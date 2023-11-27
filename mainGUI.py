@@ -4,7 +4,6 @@ import pygame
 import sys
 from tkinter import Tk, filedialog
 import cv2
-import numpy as np
 from mainCode import *
 
 # Initialize Pygame
@@ -25,11 +24,29 @@ font = pygame.font.Font(None, 36)
 selected_font = pygame.font.Font(None, 40)
 
 # Variables 
-animal_sight_type = None
+animal_sight_type = "Cat"
+animals = ["Dog", "Cat", "Bird", "Bee", "Bat", "Crab", "Snake"]
 text_default_images = font.render("1. Default Images", True, BLACK)
 text_upload_images = font.render("2. Upload Image", True, BLACK)
 text_webcam = font.render("3. Webcam Image", True, BLACK)
 text_exit = font.render("0. Exit", True, BLACK)
+
+# Open file dialog to get image path
+root = Tk()
+root.withdraw()
+
+# Function to handle navigation bar
+def handle_navigation_bar(animals):
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            handle_mouse_click(event.pos, animals)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_0 or event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+            elif event.key in [pygame.K_1, pygame.K_2, pygame.K_3]:
+                return int(event.key)
+    return None
 
 # Function to display the images
 def display_images(original_image, transformed_image):
@@ -38,6 +55,65 @@ def display_images(original_image, transformed_image):
 
     # Display transformed image
     screen.blit(transformed_image, (550, 50))
+
+    # Display return to menu button
+    text_return = font.render("Return to Menu", True, BLACK)
+    pygame.draw.rect(screen, WHITE, (600, 500, 150, 40))
+    screen.blit(text_return, (600, 500))
+
+    pygame.display.flip()
+
+# Function to display the default images section
+def display_default_images(animals):
+    screen.fill(WHITE)
+
+    # Display default images dynamically
+    for i, animal in enumerate(animals):
+        x = i * (screen_width // len(animals))
+        if animal == animal_sight_type:
+            text_animal = selected_font.render(animal, True, BLACK)
+        else:
+            text_animal = font.render(animal, True, BLACK)
+        screen.blit(text_animal, (x, 0))
+
+        # Transform the image to the selected animal sight type
+        original_image = pygame.image.load("images/" + animal + ".jpg")
+        original_image = pygame.transform.scale(original_image, (400, 400))
+
+        # Convert the image to a NumPy array
+        original_array = pygame.surfarray.array3d(original_image)
+
+        if animal_sight_type == "Dog":
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_dog_sight(original_array), 0, 1))
+        elif animal_sight_type == "Cat":
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_cat_sight(original_array), 0, 1))
+        elif animal_sight_type == "Bird":
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_bird_sight(original_array), 0, 1))
+        elif animal_sight_type == "Bee":
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_bee_sight(original_array), 0, 1))
+        elif animal_sight_type == "Bat":
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_bat_sight(original_array), 0, 1))
+        elif animal_sight_type == "Crab":
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_crab_sight(original_array), 0, 1))
+        elif animal_sight_type == "Snake":
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_snake_sight(original_array), 0, 1))
+        else:
+            transformed_image = pygame.surfarray.make_surface(np.swapaxes(original_array, 0, 1))
+
+        # Display the transformed image
+        screen.blit(transformed_image, (x, 50))
+
+    # Display navigation bar
+    for i, animal in enumerate(animals):
+        if animal == animal_sight_type:
+            text_animal = selected_font.render(animal, True, BLACK)
+        else:
+            text_animal = font.render(animal, True, BLACK)
+        screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+
+    pygame.display.flip()
+
+    return handle_navigation_bar(animals)
 
     # Display navigation bar
     animals = ["Dog", "Cat", "Bird", "Bee", "Bat", "Crab", "Snake"]
@@ -48,25 +124,14 @@ def display_images(original_image, transformed_image):
             text_animal = font.render(animal, True, BLACK)
         screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
 
-    # Display return to menu button
-    text_return = font.render("Return to Menu", True, BLACK)
-    pygame.draw.rect(screen, WHITE, (600, 500, 150, 40))
-    screen.blit(text_return, (600, 500))
-
     pygame.display.flip()
 
-# Function to display the default images section
-def display_default_images():
-    screen.fill(WHITE)
-    
-    # Display default images
-    original_image, transformed_image = transform_image("images/dog.jpg")
-    display_images(original_image, transformed_image)
+    return handle_navigation_bar(animals)
 
 # Function to display the upload image section
 def display_upload_image():
     screen.fill(WHITE)
-    
+
     # Open file dialog to get image path
     root = Tk()
     root.withdraw()
@@ -77,11 +142,35 @@ def display_upload_image():
         original_image, transformed_image = transform_image(image_path)
         display_images(original_image, transformed_image)
 
+    # Display navigation bar
+    animals = ["Dog", "Cat", "Bird", "Bee", "Bat", "Crab", "Snake"]
+    for i, animal in enumerate(animals):
+        if animal == animal_sight_type:
+            text_animal = selected_font.render(animal, True, BLACK)
+        else:
+            text_animal = font.render(animal, True, BLACK)
+        screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+
+    pygame.display.flip()
+
+    return handle_navigation_bar(animals)
+
 # Function to display the webcam section
 def display_webcam():
     screen.fill(WHITE)
     transformed_image = pygame.Surface((400, 400))
     cap = cv2.VideoCapture(0)
+
+    # Display navigation bar
+    animals = ["Dog", "Cat", "Bird", "Bee", "Bat", "Crab", "Snake"]
+    for i, animal in enumerate(animals):
+        if animal == animal_sight_type:
+            text_animal = selected_font.render(animal, True, BLACK)
+        else:
+            text_animal = font.render(animal, True, BLACK)
+        screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+
+    pygame.display.flip()
 
     while True:
         for event in pygame.event.get():
@@ -90,10 +179,6 @@ def display_webcam():
                 cv2.destroyAllWindows()
                 pygame.quit()
                 sys.exit()
-
-            # Handling mouse clicks
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                handle_mouse_click(event.pos)
 
         _, frame = cap.read()
         cv2.imshow("Webcam", frame)
@@ -112,20 +197,29 @@ def display_webcam():
     cap.release()
     cv2.destroyAllWindows()
 
+    return handle_navigation_bar(animals)
+
+
 # Flag to track whether to display the main menu
 menu_active = True
 
 # Function to handle mouse clicks
 def handle_mouse_click(position):
-    global menu_active
+    global menu_active, animal_sight_type
     if not menu_active:
         # If not in the menu, check for the "Return to Menu" button
         if 600 <= position[0] <= 750 and 500 <= position[1] <= 540:
             menu_active = True  # Set back to True when returning to the menu
+
+        for i, animal in enumerate(animals):
+            x = i * (screen_width // len(animals))
+            if x <= position[0] <= x + screen_width // len(animals) and 0 <= position[1] <= 40:
+                animal_sight_type = animal
+                break
     else:
         # If in the menu, check for other options
         if 50 <= position[0] <= 50 + text_default_images.get_width() and 200 <= position[1] <= 200 + text_default_images.get_height():
-            display_default_images()
+            display_default_images([animal_sight_type])  # Pass the selected animal type
             menu_active = False
         elif 50 <= position[0] <= 50 + text_upload_images.get_width() and 300 <= position[1] <= 300 + text_upload_images.get_height():
             display_upload_image()
@@ -133,9 +227,6 @@ def handle_mouse_click(position):
         elif 50 <= position[0] <= 50 + text_webcam.get_width() and 400 <= position[1] <= 400 + text_webcam.get_height():
             display_webcam()
             menu_active = False
-        elif 600 <= position[0] <= 750 and 500 <= position[1] <= 540:
-            # "Return to Menu" button is clicked, set menu_active to True
-            menu_active = True
 
 # Function to display the menu
 def display_menu():
