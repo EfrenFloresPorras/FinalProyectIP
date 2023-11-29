@@ -1,5 +1,6 @@
 # mainGUI.py
 
+import dis
 import pygame
 import sys
 from tkinter import Tk, filedialog
@@ -84,114 +85,143 @@ def transform_image(image_path, animal_sight_type):
     return original_image, transformed_image
 
 # Function to display the default images section
-def display_default_images():
-    screen.fill(WHITE)
+def display_default_images(section_active):
+    # Initialize the flag
+    section_active = True
 
-    # Display default images dynamically
-    for i, animal in enumerate(animals):
-        x = i * (screen_width // len(animals))
+    while section_active:
+        screen.fill(WHITE)
 
-        # Transform the image to the selected animal sight type
-        original_image, transformed_image = transform_image("images/" + animal + ".jpg", animal_sight_type)
+        # Display default images dynamically
+        for i, animal in enumerate(animals):
+            x = i * (screen_width // len(animals))
 
-        # Display the transformed image
-        screen.blit(transformed_image, (x, 50))
+            # Transform the image to the selected animal sight type
+            original_image, transformed_image = transform_image("images/" + animal + ".jpg", animal_sight_type)
 
-    # Display navigation bar
-    for i, animal in enumerate(animals):
-        text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
-        screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+            # Display the transformed image
+            screen.blit(transformed_image, (x, 50))
 
-    # Display return to menu button
-    text_return = font.render("Return to Menu", True, BLACK)
-    pygame.draw.rect(screen, WHITE, (600, 500, 150, 40))
-    screen.blit(text_return, (600, 500))
+        # Display navigation bar
+        for i, animal in enumerate(animals):
+            text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
+            screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
 
-    pygame.display.flip()
+        # Display return to menu button
+        text_return = font.render("Return to Menu", True, BLACK)
+        pygame.draw.rect(screen, WHITE, (600, 500, 150, 40))
+        screen.blit(text_return, (600, 500))
 
-    # Return the updated values
-    return menu_active, animal_sight_type, None
+        pygame.display.flip()
+
+        # Reset the flag to stay in the section
+        section_active = False
+
+    # Return to the main menu
+    return True, animal_sight_type, None, False
+
 
 # Function to display the upload image section
-def display_upload_image():
-    screen.fill(WHITE)
+def display_upload_image(section_active):
+    # Initialize the flag
+    section_active = True
 
-    # Open file dialog to get image path
-    image_path = filedialog.askopenfilename()
-    if image_path:
-        original_image, transformed_image = transform_image(image_path, animal_sight_type)
-        display_images(original_image, transformed_image)
+    while section_active:
+        screen.fill(WHITE)
 
-    # Display navigation bar
-    for i, animal in enumerate(animals):
-        text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
-        screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+        # Open file dialog to get image path
+        image_path = filedialog.askopenfilename()
 
-    pygame.display.flip()
+        # Check if an image was selected
+        if image_path:
+            original_image, transformed_image = transform_image(image_path, animal_sight_type)
+            display_images(original_image, transformed_image)
 
-    # Return the updated values
-    return menu_active, animal_sight_type, None
+            # Display navigation bar
+            for i, animal in enumerate(animals):
+                text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
+                screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+
+            pygame.display.flip()
+
+            # Reset the flag to stay in the section
+            section_active = False
+
+    # Return to the main menu
+    return True, animal_sight_type, None, False
+
 
 # Function to display the webcam section
 def display_webcam():
-    screen.fill(WHITE)
-    transformed_image = pygame.Surface((400, 400))
-    cap = cv2.VideoCapture(0)
+    # Initialize the flag
+    section_active = True
 
-    # Display navigation bar
-    for i, animal in enumerate(animals):
-        text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
-        screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+    while section_active:
+        screen.fill(WHITE)
+        transformed_image = pygame.Surface((400, 400))
+        cap = cv2.VideoCapture(0)
 
-    pygame.display.flip()
+        # Display navigation bar
+        for i, animal in enumerate(animals):
+            text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
+            screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                cap.release()
-                cv2.destroyAllWindows()
-                pygame.quit()
-                sys.exit()
-
-        _, frame = cap.read()
-        cv2.imshow("Webcam", frame)
-
-        # Add transformation to the webcam frame
-        transformed_frame = transform_webcam_image(frame, animal_sight_type)
-
-        # Display the transformed frame
-        pygame.surfarray.blit_array(transformed_image, np.swapaxes(transformed_frame, 0, 1))
         pygame.display.flip()
 
-        # Break the loop if 'q' key is pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    pygame.quit()
+                    sys.exit()
 
-    cap.release()
-    cv2.destroyAllWindows()
+            _, frame = cap.read()
+            cv2.imshow("Webcam", frame)
 
-    # Return the updated values
-    return menu_active, animal_sight_type, None
+            # Add transformation to the webcam frame
+            transformed_frame = transform_webcam_image(frame, animal_sight_type)
+
+            # Display the transformed frame
+            pygame.surfarray.blit_array(transformed_image, np.swapaxes(transformed_frame, 0, 1))
+            pygame.display.flip()
+
+            # Break the loop if 'q' key is pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+        # Reset the flag to stay in the section
+        section_active = False
+
+    # Return to the main menu
+    return True, animal_sight_type, None
+
 
 # Flag to track whether to display the main menu
 menu_active = True
 
+# Flag to track whether to stay in the current section
+section_active = False
+
 # Function to handle mouse clicks
-def handle_mouse_click(position, animals, menu_active, menu_option):
-    global animal_sight_type  # Declare as a global variable
+def handle_mouse_click(position, animals, menu_active, menu_option, section_active):
+    global animal_sight_type  # Declare as global variable
 
     if not menu_active:
         # If not in the menu, check for the "Return to Menu" button
         if 600 <= position[0] <= 750 and 500 <= position[1] <= 540:
             print("Return to Menu button clicked")
-            return True, animal_sight_type, None  # Set back to True when returning to the menu
+            return True, animal_sight_type, None, False  # Set back to False when returning to the menu
 
         for i, animal in enumerate(animals):
             x = i * (screen_width // len(animals))
             if x <= position[0] <= x + screen_width // len(animals) and 0 <= position[1] <= 40:
                 animal_sight_type = animal
                 print(f"Animal selected: {animal}")
-                break
+                return menu_active, animal_sight_type, menu_option, False  # Set back to False when an animal is selected
     else:
         # If in the menu, check for other options
         menu_options = ["Default Images", "Upload Image", "Webcam Image", "Exit"]
@@ -201,20 +231,20 @@ def handle_mouse_click(position, animals, menu_active, menu_option):
             if option_rect.collidepoint(*position):
                 if option == "Default Images":
                     print("Default Images selected")
-                    return False, animal_sight_type, "1"
+                    return False, animal_sight_type, "1", True  # Set to True when entering a section
                 elif option == "Upload Image":
                     print("Upload Image selected")
-                    return False, animal_sight_type, "2"
+                    return False, animal_sight_type, "2", True  # Set to True when entering a section
                 elif option == "Webcam Image":
                     print("Webcam Image selected")
-                    return False, animal_sight_type, "3"
+                    return False, animal_sight_type, "3", True  # Set to True when entering a section
                 elif option == "Exit":
                     print("Exit selected")
                     cleanup_resources()
                     pygame.quit()
                     sys.exit()
 
-    return menu_active, animal_sight_type, menu_option
+    return menu_active, animal_sight_type, menu_option, section_active
 
 
 def cleanup_resources(cap=None):
@@ -261,6 +291,7 @@ def main():
     # Main loop
     menu_option = None  # Added variable to keep track of the selected menu option
     current_display = None  # Added variable to keep track of the current display
+    menu_active = True  # Set menu_active to True initially
 
     while True:
         for event in pygame.event.get():
@@ -269,37 +300,38 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-            if current_display is None:
-                # If there's no current display, show the menu
-                display_menu(menu_option)
+            # Handling key presses
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_0 or event.key == pygame.K_ESCAPE:
+                    cleanup_resources()
+                    pygame.quit()
+                    sys.exit()
+                elif event.key in [pygame.K_1, pygame.K_2, pygame.K_3]:
+                    if event.key == pygame.K_1:
+                        current_display = display_default_images
+                        display_default_images(True)
+                    elif event.key == pygame.K_2:
+                        current_display = display_upload_image
+                        display_upload_image(True)
+                    elif event.key == pygame.K_3:
+                        current_display = display_webcam
+                        display_webcam()
 
-                # Handling key presses
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_0 or event.key == pygame.K_ESCAPE:
-                        cleanup_resources()
-                        pygame.quit()
-                        sys.exit()
-                    elif event.key in [pygame.K_1, pygame.K_2, pygame.K_3]:
-                        if event.key == pygame.K_1:
-                            current_display = display_default_images
-                        elif event.key == pygame.K_2:
-                            current_display = display_upload_image
-                        elif event.key == pygame.K_3:
-                            current_display = display_webcam
+            # Handling mouse clicks
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                menu_active, animal_sight_type, menu_option, section_active = handle_mouse_click(event.pos, animals, menu_active, menu_option, section_active)
 
-            # Handling mouse clicks (moved outside the menu_active check)
-            menu_active = False  # Initialize menu_active with a default value
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    menu_active, animal_sight_type, menu_option = handle_mouse_click(event.pos, animals, menu_active, menu_option)
 
-                    if menu_option is not None:
-                        if menu_option == "1":
-                            current_display = display_default_images
-                        elif menu_option == "2":
-                            current_display = display_upload_image
-                        elif menu_option == "3":
-                            current_display = display_webcam
+                if menu_option is not None:
+                    if menu_option == "1":
+                        current_display = display_default_images
+                        display_default_images(True)
+                    elif menu_option == "2":
+                        current_display = display_upload_image
+                        display_upload_image(True)
+                    elif menu_option == "3":
+                        current_display = display_webcam
+                        display_webcam()
 
         # If there's a current display, execute it
         if current_display is not None:
@@ -308,6 +340,9 @@ def main():
             # If menu_option is not None, that means the display returned from its section
             if menu_option is not None:
                 current_display = None  # Set the current display back to None to show the menu again
+
+        # Show the menu
+        display_menu(menu_option)
 
         pygame.display.flip()
         pygame.time.delay(30)
