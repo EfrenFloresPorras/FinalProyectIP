@@ -293,6 +293,7 @@ def main():
     menu_active = True  # Set menu_active to True initially
     section_active = False  # Set section_active to False initially
     animal_sight_type = "Dog"  # Set animal_sight_type to Dog initially
+    current_display = None  # Initialize current_display outside the loop
 
     while True:
         for event in pygame.event.get():
@@ -311,35 +312,19 @@ def main():
                     animal_sight_type = None  # Assign a default value to animal_sight_type
                     if event.key == pygame.K_1:
                         current_display = display_default_images
-                        menu_active, animal_sight_type, menu_option, section_active = display_default_images(True), animal_sight_type, menu_option, False
                     elif event.key == pygame.K_2:
                         current_display = display_upload_image
-                        menu_active, animal_sight_type, menu_option, section_active = display_upload_image(True), animal_sight_type, menu_option, False
                     elif event.key == pygame.K_3:
                         current_display = display_webcam
-                        menu_active, animal_sight_type, menu_option, section_active = display_webcam(), animal_sight_type, menu_option, False
-
-            # Handling mouse clicks
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                menu_active, animal_sight_type, menu_option, section_active = handle_mouse_click(event.pos, animals, menu_active, menu_option, section_active)
-
-                if menu_option is not None:
-                    if menu_option == "1":
-                        current_display = display_default_images
-                        menu_active, animal_sight_type, menu_option, section_active = display_default_images(True), animal_sight_type, menu_option, section_active
-                    elif menu_option == "2":
-                        current_display = display_upload_image
-                        menu_active, animal_sight_type, menu_option, section_active = display_upload_image(True), animal_sight_type, menu_option, section_active
-                    elif menu_option == "3":
-                        current_display = display_webcam
-                        menu_active, animal_sight_type, menu_option, section_active = display_webcam(), animal_sight_type, menu_option, section_active
 
         # If there's a current display, execute it
         if current_display is not None:
-            menu_active, animal_sight_type, menu_option, section_active = current_display(True)
+            menu_active, animal_sight_type, menu_option, section_active = current_display(section_active)
+            current_display = None  # Reset current_display after executing
+
             if menu_option is not None:
-                current_display = None
                 display_menu(menu_option)
+
         else:
             menu_option = None
             section_active = False
@@ -347,8 +332,3 @@ def main():
 
         pygame.display.flip()
         pygame.time.delay(30)
-
-
-
-if __name__ == "__main__":
-    main()
