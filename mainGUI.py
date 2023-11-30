@@ -88,26 +88,21 @@ def transform_image(image_path, animal_sight_type):
 
 # Function to display the default images section
 def display_default_images(section_active):
-    # Load and transform the first image outside the loop
-    original_image, transformed_image = transform_image("images/" + animals[0] + ".jpg", animal_sight_type)
-
     # Initialize the flag
     section_active = True
+    animal_sight_type = "Dog"
 
     while section_active:
         screen.fill(WHITE)
-
-        # Display transformed images dynamically
-        for i, animal in enumerate(animals):
-            x = i * (screen_width // len(animals))
-
-            # Display the transformed image
-            screen.blit(transformed_image, (x, 50))
-
+        
         # Display navigation bar
         for i, animal in enumerate(animals):
             text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
             screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
+
+        # Display the images
+        original_image, transformed_image = transform_image(f"images/{animal_sight_type.lower()}.jpg", animal_sight_type)
+        display_images(original_image, transformed_image)
 
         # Display return to menu button
         text_return = font.render("Return to Menu", True, BLACK)
@@ -116,8 +111,26 @@ def display_default_images(section_active):
 
         pygame.display.flip()
 
-        # Reset the flag to stay in the section
-        section_active = False
+        # Event handling within the loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                section_active = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if 600 <= event.pos[0] <= 750 and 500 <= event.pos[1] <= 540:
+                    print("Return to Menu button clicked")
+                    section_active = False
+                else:
+                    for i, animal in enumerate(animals):
+                        x = i * (screen_width // len(animals))
+                        if x <= event.pos[0] <= x + screen_width // len(animals) and 0 <= event.pos[1] <= 40:
+                            animal_sight_type = animal
+                            print(f"Animal selected: {animal}")
+                            # Keep the section active to continue displaying images
+                            # Let's print a message indicating that the images should change
+                            print("Images should change for the selected animal")
+
+    # Reset the flag to stay in the section
+    section_active = False
 
     # Return to the main menu
     return True, animal_sight_type, None, False
@@ -127,6 +140,7 @@ def display_default_images(section_active):
 def display_upload_image(section_active):
     # Initialize the flag
     section_active = True
+    animal_sight_type = "Dog"
 
     # Open file dialog to get image path
     image_path = filedialog.askopenfilename()
@@ -147,10 +161,33 @@ def display_upload_image(section_active):
                 text_animal = selected_font.render(animal, True, BLACK) if animal == animal_sight_type else font.render(animal, True, BLACK)
                 screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
 
+            # Display return to menu button
+            text_return = font.render("Return to Menu", True, BLACK)
+            pygame.draw.rect(screen, WHITE, (600, 500, 150, 40))
+            screen.blit(text_return, (600, 500))
+
             pygame.display.flip()
 
-            # Reset the flag to stay in the section
-            section_active = False
+            # Event handling within the loop
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    section_active = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if 600 <= event.pos[0] <= 750 and 500 <= event.pos[1] <= 540:
+                        print("Return to Menu button clicked")
+                        section_active = False
+                    else:
+                        for i, animal in enumerate(animals):
+                            x = i * (screen_width // len(animals))
+                            if x <= event.pos[0] <= x + screen_width // len(animals) and 0 <= event.pos[1] <= 40:
+                                animal_sight_type = animal
+                                print(f"Animal selected: {animal}")
+                                # Keep the section active to continue displaying images
+                                # Let's print a message indicating that the images should change
+                                print("Images should change for the selected animal")
+
+    # Reset the flag to stay in the section
+    section_active = False
 
     # Return to the main menu
     return True, animal_sight_type, None, False
@@ -160,10 +197,10 @@ def display_upload_image(section_active):
 def display_webcam(section_active):
     # Initialize the flag
     section_active = True
+    animal_sight_type = "Dog"
 
     while section_active:
         screen.fill(WHITE)
-        transformed_image = pygame.Surface((400, 400))
         cap = cv2.VideoCapture(0)
 
         # Display navigation bar
@@ -172,6 +209,10 @@ def display_webcam(section_active):
             screen.blit(text_animal, (i * (screen_width // len(animals)), 0))
 
         pygame.display.flip()
+
+        # Create surfaces for left and right sections
+        left_section = pygame.Surface((350, 350))
+        right_section = pygame.Surface((350, 350))
 
         while True:
             for event in pygame.event.get():
@@ -182,13 +223,39 @@ def display_webcam(section_active):
                     sys.exit()
 
             _, frame = cap.read()
-            cv2.imshow("Webcam", frame)
 
-            # Add transformation to the webcam frame
-            transformed_frame = transform_webcam_image(frame, animal_sight_type)
+            # Resize the frame to match surface dimensions
+            frame = cv2.resize(frame, (350, 350))
 
-            # Display the transformed frame
-            pygame.surfarray.blit_array(transformed_image, np.swapaxes(transformed_frame, 0, 1))
+            # Debug statement: Display the selected animal before and after transformation
+            print(f"Before transformation: {animal_sight_type}")
+            
+            # Add transformation to the webcam frame according to the selected animal
+            if animal_sight_type == "Dog":
+                transformed_frame = transform_to_dog_sight(frame)
+            elif animal_sight_type == "Bee":
+                transformed_frame = transform_to_bee_sight(frame)
+            elif animal_sight_type == "Bat":
+                transformed_frame = transform_to_bat_sight(frame)
+            elif animal_sight_type == "Snake":
+                transformed_frame = transform_to_snake_sight(frame)
+            else:
+                transformed_frame = frame
+
+            print(f"After transformation: {animal_sight_type}")
+
+            # Display the original frame on the left
+            if isinstance(frame, np.ndarray) and frame.size > 0:  # Check if the object is a NumPy array and non-empty
+                pygame.surfarray.blit_array(left_section, np.swapaxes(frame, 0, 1))
+
+            # Display the transformed frame on the right
+            if isinstance(transformed_frame, np.ndarray) and transformed_frame.size > 0:  # Check if the object is a NumPy array and non-empty
+                pygame.surfarray.blit_array(right_section, np.swapaxes(transformed_frame, 0, 1))
+
+            # Blit the left and right sections onto the main screen
+            screen.blit(left_section, (50, 50))
+            screen.blit(right_section, (500, 50))
+
             pygame.display.flip()
 
             # Break the loop if 'q' key is pressed
@@ -198,11 +265,13 @@ def display_webcam(section_active):
         cap.release()
         cv2.destroyAllWindows()
 
-        # Reset the flag to stay in the section
-        section_active = False
+    # Reset the flag to stay in the section
+    section_active = False
 
     # Return to the main menu
     return True, animal_sight_type, None, False
+
+
 
 # Flag to track whether to display the main menu
 menu_active = True
