@@ -222,45 +222,53 @@ def display_webcam(section_active):
                     pygame.quit()
                     sys.exit()
 
-            _, frame = cap.read()
+                _, frame = cap.read()
 
-            # Resize the frame to match surface dimensions
-            frame = cv2.resize(frame, (350, 350))
+                # Resize the frame to match surface dimensions
+                frame = cv2.resize(frame, (350, 350))
 
-            # Debug statement: Display the selected animal before and after transformation
-            print(f"Before transformation: {animal_sight_type}")
-            
-            # Add transformation to the webcam frame according to the selected animal
-            if animal_sight_type == "Dog":
-                transformed_frame = transform_to_dog_sight(frame)
-            elif animal_sight_type == "Bee":
-                transformed_frame = transform_to_bee_sight(frame)
-            elif animal_sight_type == "Bat":
-                transformed_frame = transform_to_bat_sight(frame)
-            elif animal_sight_type == "Snake":
-                transformed_frame = transform_to_snake_sight(frame)
-            else:
-                transformed_frame = frame
+                # Debug statement: Display the selected animal before and after transformation
+                print(f"Before transformation: {animal_sight_type}")
+                
+                # Add transformation to the webcam frame according to the selected animal
+                if animal_sight_type == "Dog":
+                    transformed_frame = transform_to_dog_sight(frame)
+                elif animal_sight_type == "Bee":
+                    transformed_frame = transform_to_bee_sight(frame)
+                elif animal_sight_type == "Bat":
+                    transformed_frame = transform_to_bat_sight(frame)
+                    transformed_frame = transformed_frame.astype(np.uint8)
+                elif animal_sight_type == "Snake":
+                    transformed_frame = transform_to_snake_sight(frame)
+                else:
+                    transformed_frame = frame
 
-            print(f"After transformation: {animal_sight_type}")
+                print(f"After transformation: {animal_sight_type}")
 
-            # Display the original frame on the left
-            if isinstance(frame, np.ndarray) and frame.size > 0:  # Check if the object is a NumPy array and non-empty
-                pygame.surfarray.blit_array(left_section, np.swapaxes(frame, 0, 1))
+                # Display the original frame on the left
+                if isinstance(frame, np.ndarray) and frame.size > 0:  # Check if the object is a NumPy array and non-empty
+                    pygame.surfarray.blit_array(left_section, np.swapaxes(frame, 0, 1))
 
-            # Display the transformed frame on the right
-            if isinstance(transformed_frame, np.ndarray) and transformed_frame.size > 0:  # Check if the object is a NumPy array and non-empty
-                pygame.surfarray.blit_array(right_section, np.swapaxes(transformed_frame, 0, 1))
+                # Display the transformed frame on the right
+                if isinstance(transformed_frame, np.ndarray) and transformed_frame.size > 0:  # Check if the object is a NumPy array and non-empty
+                    pygame.surfarray.blit_array(right_section, np.swapaxes(transformed_frame, 0, 1))
 
-            # Blit the left and right sections onto the main screen
-            screen.blit(left_section, (50, 50))
-            screen.blit(right_section, (500, 50))
+                # Blit the left and right sections onto the main screen
+                screen.blit(left_section, (50, 50))
+                screen.blit(right_section, (500, 50))
 
-            pygame.display.flip()
+                pygame.display.flip()
 
-            # Break the loop if 'q' key is pressed
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+                # Break the loop if 'q' key is pressed
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+
+                # Break the loop if a different animal_sight_type is selected
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    selected_index = x // (screen_width // len(animals))
+                    animal_sight_type = animals[selected_index]
+                    break
 
         cap.release()
         cv2.destroyAllWindows()
@@ -305,12 +313,15 @@ def handle_mouse_click(position, animals, menu_active, menu_option, section_acti
             if option_rect.collidepoint(*position):
                 if option == "Default Images":
                     print("Default Images selected")
+                    display_default_images(section_active)
                     return False, animal_sight_type, "1", True  # Set to True when entering a section
                 elif option == "Upload Image":
                     print("Upload Image selected")
+                    display_upload_image(section_active)
                     return False, animal_sight_type, "2", True  # Set to True when entering a section
                 elif option == "Webcam Image":
                     print("Webcam Image selected")
+                    display_webcam(section_active)
                     return False, animal_sight_type, "3", True  # Set to True when entering a section
                 elif option == "Exit":
                     print("Exit selected")
@@ -371,7 +382,6 @@ def main():
     current_display = None  # Added variable to keep track of the current display
     menu_active = True  # Set menu_active to True initially
     section_active = False  # Set section_active to False initially
-    animal_sight_type = "Dog"  # Set animal_sight_type to Dog initially
     current_display = None  # Initialize current_display outside the loop
 
     while True:
