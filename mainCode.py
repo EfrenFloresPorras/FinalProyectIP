@@ -46,7 +46,21 @@ def transform_to_bat_sight(image):
     final_img = cv.filter2D(img_gris, -1, laplce1)
     return final_img
 
-def transform_to_snake_sight(image):
-    # Replace this with actual transformation logic for snake sight
-    # For now, just return the original image
-    return image
+def transform_to_snake_sight(img_link):
+    img = cv.imread(img_link)
+
+    # Split channels
+    b, g, r = cv.split(img)
+
+    # Convert channels to NumPy arrays
+    b = np.array(b, dtype=np.float32)
+    g = np.array(g, dtype=np.float32)
+    r = np.array(r, dtype=np.float32)
+    
+    infrared_img = img.copy()
+    infrared_img[:, :, 0] = b * 0.5
+    infrared_img[:, :, 1] = g * 1.5
+    infrared_img[:, :, 2] = r * 3
+
+
+    return infrared_img
