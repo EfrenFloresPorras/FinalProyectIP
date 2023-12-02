@@ -53,8 +53,8 @@ def display_images(original_image, transformed_image):
     # Display original image
     screen.blit(original_image, (50, 50))
 
-    # Display transformed image
-    screen.blit(transformed_image, (550, 50))
+    # Display transformed image and flip it
+    screen.blit(transformed_image, (500, 50))
 
     # Display return to menu button
     text_return = font.render("Return to Menu", True, BLACK)
