@@ -14,14 +14,7 @@ def transform_to_dog_sight(image):
     # Merge blue and green channels
     final_img = delete_red[:, :, [1, 0, 0]]
 
-<<<<<<< Updated upstream
     return cv.cvtColor(final_img, cv.COLOR_BGR2RGB)
-=======
-    # Flip image vertically
-    final_img = cv.flip(final_img, 0)
-
-    return final_img
->>>>>>> Stashed changes
 
 def transform_to_bee_sight(image):
     # Ultra violet vision
