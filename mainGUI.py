@@ -64,7 +64,6 @@ def display_images(original_image, transformed_image):
     pygame.display.flip()
 
 
-# Function to transform an image
 def transform_image(image_path, animal_sight_type):
     original_image = pygame.image.load(image_path)
     original_image = pygame.transform.scale(original_image, (400, 400))
@@ -72,6 +71,11 @@ def transform_image(image_path, animal_sight_type):
     # Convert the image to a NumPy array
     original_array = pygame.surfarray.array3d(original_image)
 
+    # Save the NumPy array as an image file
+    temp_file_path = "temp_image.jpg"
+    cv2.imwrite(temp_file_path, cv2.cvtColor(original_array, cv2.COLOR_RGB2BGR))
+
+    # Call the appropriate transformation function
     if animal_sight_type == "Dog":
         transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_dog_sight(original_array), 0, 1))
     elif animal_sight_type == "Bee":
@@ -79,9 +83,12 @@ def transform_image(image_path, animal_sight_type):
     elif animal_sight_type == "Bat":
         transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_bat_sight(original_array), 0, 1))
     elif animal_sight_type == "Snake":
-        transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_snake_sight(original_array), 0, 1))
+        transformed_image = pygame.surfarray.make_surface(np.swapaxes(transform_to_snake_sight(temp_file_path), 0, 1))
     else:
         transformed_image = pygame.surfarray.make_surface(np.swapaxes(original_array, 0, 1))
+
+    # Flip transformed image 90 degrees
+    transformed_image = pygame.transform.rotate(transformed_image, 270)
 
     return original_image, transformed_image
 

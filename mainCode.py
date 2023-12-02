@@ -46,6 +46,7 @@ def transform_to_bat_sight(image):
     return final_img
 
 def transform_to_snake_sight(img_link):
+    # Infrared vision
     img = cv.imread(img_link)
 
     # Split channels
