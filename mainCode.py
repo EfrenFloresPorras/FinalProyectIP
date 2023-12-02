@@ -14,7 +14,7 @@ def transform_to_dog_sight(image):
     # Merge blue and green channels
     final_img = delete_red[:, :, [1, 0, 0]]
 
-    return final_img
+    return cv.cvtColor(final_img, cv.COLOR_BGR2RGB)
 
 def transform_to_bee_sight(image):
     # Ultra violet vision
@@ -32,8 +32,7 @@ def transform_to_bee_sight(image):
     uv_image[:, :, 1] = g * 0.5  # Adjusting the green channel
     uv_image[:, :, 2] = r * 1.5  # Adjusting the red channel
 
-    final_img = cv.cvtColor(uv_image, cv.COLOR_BGR2RGB)
-    return final_img
+    return cv.cvtColor(uv_image, cv.COLOR_BGR2RGB)
 
 def transform_to_bat_sight(image):
     # Eco location
@@ -44,7 +43,7 @@ def transform_to_bat_sight(image):
         [0, 1, 0]
     ])
     final_img = cv.filter2D(img_gris, -1, laplce1)
-    return final_img
+    return cv.cvtColor(final_img, cv.COLOR_BGR2RGB)
 
 def transform_to_snake_sight(img_link):
     img = cv.imread(img_link)
@@ -62,5 +61,4 @@ def transform_to_snake_sight(img_link):
     infrared_img[:, :, 1] = g * 1.5
     infrared_img[:, :, 2] = r * 3
 
-
-    return infrared_img
+    return cv.cvtColor(infrared_img, cv.COLOR_BGR2RGB)

@@ -111,7 +111,7 @@ def display_default_images(section_active):
 
         pygame.display.flip()
 
-        # Event handling within the loop
+        # Event handling within the loop 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 section_active = False
