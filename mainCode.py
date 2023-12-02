@@ -43,7 +43,7 @@ def transform_to_bat_sight(image):
         [0, 1, 0]
     ])
     final_img = cv.filter2D(img_gris, -1, laplce1)
-    return cv.cvtColor(final_img, cv.COLOR_BGR2RGB)
+    return final_img
 
 def transform_to_snake_sight(img_link):
     img = cv.imread(img_link)
