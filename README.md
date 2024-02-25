@@ -1,5 +1,5 @@
 # ProyectIP
- This repository will contain the code made for the final proyect of the class of Image Processing
+ This project aims to learn the use of OpenCV and work with the camera, the objective is to simulate the vision of different animals.
 
 ## Need to download:
 pygames
